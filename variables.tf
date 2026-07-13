@@ -31,12 +31,13 @@ EOT
       users = optional(set(number))
     }))
   }))
-  # --- Unconfirmed validation candidates, derived from github_repository_environment's provider source ---
-  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
-  # or a path that crosses a list-typed block (needs its own for_each wrapping).
-  # Review, translate into a real validation{} block above, and delete once confirmed.
-  # path: wait_timer
-  #   condition: value >= 0 && value <= 43200
-  #   message:   must be between 0 and 43200
+  validation {
+    condition = alltrue([
+      for k, v in var.repository_environments : (
+        v.wait_timer == null || (v.wait_timer >= 0 && v.wait_timer <= 43200)
+      )
+    ])
+    error_message = "must be between 0 and 43200"
+  }
 }
 
